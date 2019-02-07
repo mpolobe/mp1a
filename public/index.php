@@ -6,4 +6,4 @@
  * Time: 9:06 PM
  */
 
-echo 'test 1234';
+echo 'test 1234 fast';
