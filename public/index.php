@@ -7,8 +7,9 @@
 
 
 <?php
-main::start("TechCrunchcontinentalUSA.csv");
+main::start("example.csv");
 class main {
+
     static public function start($filename) {
         $records = csvFileReader::getRecords($filename);
         staticHtml::bootstrapTemplate($records);
@@ -21,11 +22,23 @@ class printer {
 }
 class recordsGenerator {
     public static function generateRecordArray($records) {
-        $recordArray = array();
+        $count = 0;
+
         foreach ($records as $record) {
-            array_push($recordArray, $record);
+
+            if ($count == 0) {
+                $array = $record->returnArray();
+                $fields = array_keys($array);
+                $values = array_values($array);
+                print_r($fields);
+                print_r($values);
+                } else {
+                $array = $record->returnArray();
+                $values = array_values($array);
+                print_r($values);
+            }
+            $count++;
         }
-        return $recordArray;
     }
 }
 class staticHtml
@@ -94,6 +107,7 @@ class dynamicHtmlGenerator {
             } else {
                 staticHtml::tableTagGenerator("td", $i);
             }
+            return $array;
         }
 }
 }
