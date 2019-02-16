@@ -126,11 +126,13 @@ class record {
         $this->{$name} = $value;
     }
 }
+
 class printer {
     public static function echoString($string) {
         echo $string;
     }
 }
+
 class recordsGenerator {
     public static function generateRecordArray($records) {
         $recordArray = array();
