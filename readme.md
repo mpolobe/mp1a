@@ -1,2 +1,2 @@
 #My Mini Project for IS601
-1. Hello
+This project is the Mini Project is601 - Project 1
