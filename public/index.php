@@ -140,4 +140,3 @@ class recordsGenerator {
         return $recordArray;
     }
 }
-?>
