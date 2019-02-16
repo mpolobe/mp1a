@@ -34,22 +34,18 @@ class csvReader {
     }
 }
 
-class printer {
-    public static function echoString($string) {
-        echo $string;
-    }
-}
-class recordsGenerator {
-    public static function generateRecordArray($records) {
-        $recordArray = array();
-        foreach ($records as $record) {
-            array_push($recordArray, $record);
-        }
-        return $recordArray;
-    }
-}
 class staticHtml
 {
+    public static function bootstrapTemplate($record) {
+        self::htmlTagGeneratorStart();
+        self::bootstrapLinkGenerator();
+        self::bodyTagGeneratorStart();
+        self::tableTagGeneratorStart();
+        dynamicHtmlGenerator::rowGenerator(recordsGenerator::generateRecordArray($record));
+        self::tableTagGeneratorEnd();
+        self::bodyTagGeneratorEnd();
+        self::htmlTagGeneratorEnd();
+    }
     public static function trTagGeneratorStart()
     {
         printer::echoString( "<tr>");
@@ -85,16 +81,7 @@ class staticHtml
     {
         printer::echoString( "</table>");
     }
-    public static function bootstrapTemplate($record) {
-        self::htmlTagGeneratorStart();
-        self::bootstrapLinkGenerator();
-        self::bodyTagGeneratorStart();
-        self::tableTagGeneratorStart();
-        dynamicHtmlGenerator::rowGenerator(recordsGenerator::generateRecordArray($record));
-        self::tableTagGeneratorEnd();
-        self::bodyTagGeneratorEnd();
-        self::htmlTagGeneratorEnd();
-    }
+
 }
 class dynamicHtmlGenerator {
     public static function rowGenerator($array) {
@@ -137,6 +124,20 @@ class record {
     }
     public function createProperty($name, $value) {
         $this->{$name} = $value;
+    }
+}
+class printer {
+    public static function echoString($string) {
+        echo $string;
+    }
+}
+class recordsGenerator {
+    public static function generateRecordArray($records) {
+        $recordArray = array();
+        foreach ($records as $record) {
+            array_push($recordArray, $record);
+        }
+        return $recordArray;
     }
 }
 ?>
