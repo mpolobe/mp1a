@@ -1,105 +1,142 @@
- <?php
+<?php
 /**
  * Created by PhpStorm.
  * User: benjamin.mpolokoso
- * Date: 07/02/2019
- * Time: 9:06 PM
+ * Date: 16/02/2019
+ * Time: 6:16 PM
  */
 
+
 main::start("example.csv");
-
-class main  {
+class main {
     static public function start($filename) {
-        $data = csv::getData($filename);
-      //  $data = file("example.csv");
-        $table = html::generateTable($data);
-
-        print_r ($data);
+        $records = csvReader::getRecords($filename);
+        staticHtml::bootstrapTemplate($records);
     }
 }
 
+class csvReader {
+    static public function getRecords($filename) {
+        $file = fopen($filename, "r");
+        $fieldNames = array();
+        $count = 0;
+        while (!feof($file)) {
+            $record = fgetcsv($file);
+            if ($count == 0) {
+                $fieldNames = $record;
+            } else {
+                $records[] = recordFactory::create($fieldNames, $record);
+            }
+            $count++;
+        }
+        fclose($file);
+        return $records;
+    }
+}
 
-class csv
+class printer {
+    public static function echoString($string) {
+        echo $string;
+    }
+}
+class recordsGenerator {
+    public static function generateRecordArray($records) {
+        $recordArray = array();
+        foreach ($records as $record) {
+            array_push($recordArray, $record);
+        }
+        return $recordArray;
+    }
+}
+class staticHtml
 {
-    static public function getData()  {
-
-
-//        foreach ($data as $line){
-//            $lineArray = explode("t", $line);
- //           list($permalink, $company, $numEmps, $city, $state, $fundedDate, $raisedAmt,$raisedCurrency, $round) = $lineArray;
-//
-//            return $data;
-//)
-
-
-
-
-$filename = 'example.csv';
-
-// The nested array to hold all the arrays
-$the_big_array = [];
-
-// Open the file for reading
-if (($h = fopen("{$filename}", "r")) !== FALSE)
-{
-    // Each line in the file is converted into an individual array that we call $data
-    // The items of the array are comma separated
-    while (($data = fgetcsv($h, 1000, ",")) !== FALSE)
+    public static function trTagGeneratorStart()
     {
-        // Each individual array is being pushed into the nested array
-        $the_big_array[] = $data;
+        printer::echoString( "<tr>");
     }
-
-    // Close the file
-    fclose($h);
-}
-
-// Display the code in a readable format
-
-
+    public static function trTagGeneratorEnd()
+    {
+        printer::echoString( "</tr>");
     }
-}
-class html{
-    static public function generateTable($data) {
-        $table = self::returnHTMLHeader();
-       print <<< HERE
-  <table border = "1">
-  <tr>
-   <th>permalink</th>
-   <th>company</th>
-   <th>numEmps</th>
-   <th>city</th>
-   <th>state</th>
-   <th>fundedDate</th>
-   <th>raisedAmt</th>
-   <th>raisedCurrency</th>
-   <th>round</th>
-  </tr>
-HERE;
-
-    return $table;
+    public static function tableTagGenerator($type, $item)
+    {
+        printer::echoString( "<" . $type . ">" . $item . "</" . $type . " >");
     }
-
-    public static function returnHTMLHeader(){
-        $table = '<!DOCTYPE html><html lang="en"><head><link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" />
-                    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-                    <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script></head><body><table class="table table-bordered table-striped">';
-        return $table;
+    public static function bootstrapLinkGenerator() {
+        printer::echoString( "<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css\">");
     }
-
-}
-class system {
-    static public function printPage($page) {
-
-        echo "<pre>";
-        var_dump($the_big_array);
-        echo "</pre>";
+    public static function htmlTagGeneratorStart(){
+        printer::echoString( "<html>");
+    }
+    public static function htmlTagGeneratorEnd(){
+        printer::echoString( "</html>");
+    }
+    public static function bodyTagGeneratorStart(){
+        printer::echoString( "<body>");
+    }
+    public static function bodyTagGeneratorEnd(){
+        printer::echoString( "</body>");
+    }
+    public static function tableTagGeneratorStart()
+    {
+        printer::echoString( "<table class='table table-striped'>\n\n");
+    }
+    public static function tableTagGeneratorEnd()
+    {
+        printer::echoString( "</table>");
+    }
+    public static function bootstrapTemplate($record) {
+        self::htmlTagGeneratorStart();
+        self::bootstrapLinkGenerator();
+        self::bodyTagGeneratorStart();
+        self::tableTagGeneratorStart();
+        dynamicHtmlGenerator::rowGenerator(recordsGenerator::generateRecordArray($record));
+        self::tableTagGeneratorEnd();
+        self::bodyTagGeneratorEnd();
+        self::htmlTagGeneratorEnd();
     }
 }
+class dynamicHtmlGenerator {
+    public static function rowGenerator($array) {
+        $count = 0;
+        foreach ($array as $item) {
+            //I dont use tableTagGenerator here because it echoes the same color rows if I use it
+            staticHtml::trTagGeneratorStart();
+            self::cellGenerator($item, $count);
+            staticHtml::trTagGeneratorEnd();
+            $count++;
+        }
+    }
+    public static function cellGenerator($item, $count) {
+        foreach ($item as $i) {
+            if ($count == 0) {
+                staticHtml::tableTagGenerator("th", $i);
+            } else {
+                staticHtml::tableTagGenerator("td", $i);
+            }
+        }
+    }
+}
 
- class recordFactory {
-     public static function create(Array $fieldNames = null, Array $values = null) {
-         $record = new record($fieldNames, $values);
-         return $record;
-     }
- }
+class recordFactory {
+    public static function create(Array $fieldNames = null, Array $values = null) {
+        $record = new record($fieldNames, $values);
+        return $record;
+    }
+}
+class record {
+    public function __construct(Array $fieldNames = null, $values = null) {
+        $record = array_combine($fieldNames, $values);
+        foreach ($record as $property => $value) {
+            $this->createProperty($property, $value);
+        }
+    }
+    public function returnArray() {
+        $array = (array)$this;
+        return $array;
+    }
+    public function createProperty($name, $value) {
+        $this->{$name} = $value;
+    }
+}
+?>
